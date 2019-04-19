@@ -10,16 +10,45 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name="com.arch.session.SessionEngine"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":session">
+            <intent-filter>
+                <action android:name="com.arch.session.SessionEngine" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.arch.live.LiveService"
+            android:process=":live"
+            android:launchMode="singleTask"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+
+        <service
+            android:name=".MainService"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.arch.kvmcdemo.MainService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
