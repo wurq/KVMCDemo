@@ -6,6 +6,9 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.arch.session.SessionCenter;
+
+
 public class LiveService extends Service {
 
     private final static String TAG = "MainService";
@@ -29,62 +32,13 @@ public class LiveService extends Service {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG,"onStartCommand entering...");
 
-//        Message msg = Message.obtain();
-//        msg.what = HANDLE_ASYNC_IPC_CALL;
-//        msg.obj = intent;
-//        mHandler.sendMessage(msg);
+        // 启动Live进程之后，注册到session进程
+        // 注意：由于跨进程的原因每个Client进程的SessionCenter都是独立运行的
+        SessionCenter.getInstance ().connectSessionEngineAsync ();
 
-        //CrashHandle.getInstance().init(this);
+        sIsServiceOn = true;
 
         return START_STICKY;
     }
 
-  /*  @Override
-    public void onDestroy() {
-        Log.d(TAG, "ForeService onDestroy");
-
-        sIsServiceOn = false;
-        sInstance = null;
-
-        if (sKillAfterStop) {
-            sKillAfterStop = false;
-
-            SessionCenter.killProcessAsync(1000);
-        }
-
-        super.onDestroy();
-    }
-
-
-
-    private Handler mHandler = new Handler (){
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case HANDLE_ASYNC_IPC_CALL: {
-                    Intent intent = (Intent) msg.obj;
-                    handleAsyncCall(intent);
-                }
-                break;
-
-                case TRY_TO_CLOSE_FORE_SERVICE: { //停止前台service
-                    removeMessages(TRY_TO_CLOSE_FORE_SERVICE);
-
-                    // 停service
-                    ForeService.stopNow();
-
-                    // 回收内存
-                    System.gc();
-
-                    Log.i(TAG, "前台Service 停止了");
-                }
-                break;
-
-
-                default:
-                    break;
-            }
-        }
-    };
-*/
 }
