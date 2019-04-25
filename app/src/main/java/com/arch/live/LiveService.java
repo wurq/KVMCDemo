@@ -7,11 +7,13 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.arch.session.SessionCenter;
+import com.arch.util.ConstCommon;
+import com.arch.util.ProcessUtils;
 
 
 public class LiveService extends Service {
 
-    private final static String TAG = "MainService";
+    private final static String TAG = "LiveService";
 
     public static boolean sIsServiceOn = false;
 
@@ -34,7 +36,11 @@ public class LiveService extends Service {
 
         // 启动Live进程之后，注册到session进程
         // 注意：由于跨进程的原因每个Client进程的SessionCenter都是独立运行的
-        SessionCenter.getInstance ().connectSessionEngineAsync ();
+        if(ProcessUtils.getCurrentProcessName ().contentEquals (ConstCommon.ProcessName.LIVE_PROCESS)) {
+            SessionCenter.getInstance ().connectSessionEngineAsync ();
+        }
+
+//        SessionCenter.getInstance ().connectSessionEngineAsync ();
 
         sIsServiceOn = true;
 

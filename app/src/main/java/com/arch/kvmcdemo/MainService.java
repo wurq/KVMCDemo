@@ -22,6 +22,8 @@ public class MainService extends Service {
         super.onStartCommand(intent, flags, startId);
         Log.i(TAG,"onStartCommand entering...");
 
+        sIsServiceOn = true;
+
         Message msg = Message.obtain();
         msg.what = HANDLE_MAIN_ASYNC_CALL;
         msg.obj = intent;

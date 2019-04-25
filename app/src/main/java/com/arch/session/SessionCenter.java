@@ -4,14 +4,18 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.arch.ipc.AbsIpcCenter;
+import com.arch.ipc.ClientIpcCenter;
 import com.arch.kvmcdemo.MainService;
 import com.arch.util.AppProfile;
+import com.arch.util.ConstCommon;
 import com.arch.util.ProcessUtils;
 import com.arch.util.ServiceUtils;
 
@@ -38,11 +42,40 @@ public class SessionCenter {
     public static boolean sIsServiceOn;
 
     ISessionConnection mSessionConnection ;
-    ISessionCallback mSessionCallback;
+//    ISessionCallback mSessionCallback;
+
+    ISessionCallback mSessionCallback = new ISessionCallback.Stub() {
+        @Override
+        public int onSessionCallback(int ipcMsg, Bundle inBundle, Bundle outBundle) throws RemoteException {
+            Log.i (TAG,"mSessionCallback --> onSessionCallback --> ipcMsg = " + ipcMsg);
+            int err;
+            try {
+                err = handleSessionCallback(ipcMsg, inBundle, outBundle);
+            } catch (Exception e) {
+                err = -1;
+                throw new RuntimeException(e);
+            }
+            return err;
+        }
+    };
+
 
 
     private SessionCenter() {
         mSessionCenterHandler = new SessionCenterHandler (this);
+
+        if(ProcessUtils.getCurrentProcessName ().contentEquals (ConstCommon.ProcessName.LIVE_PROCESS)) {
+            ClientIpcCenter.getInstance ().registerIpcReceiver (ConstCommon.IpcMsgType.B2L_TEST,
+                    new AbsIpcCenter.IIpcReceiver () {
+                @Override
+                public int onIpcCall(int ipcMsg, Bundle inBundle, Bundle outBundle) {
+                    Log.i (TAG,"inBundle testvalue = "+ inBundle.get ("testvalue"));
+                    inBundle.putInt("testvalue2", 22);
+                    ClientIpcCenter.getInstance ().ipcCall (ConstCommon.IpcMsgType.M2B_TEST,inBundle,null);
+                    return 0;
+                }
+            });
+        }
     }
 
     // ------------------------------------------------------
@@ -75,7 +108,9 @@ public class SessionCenter {
 
         // 在异步启动session的同时，启动main所在进程的service
         // 由于所在进程暂定为默认进程
-        if (!MainService.sIsServiceOn) {
+        if (!MainService.sIsServiceOn&&
+                ProcessUtils.getCurrentProcessName ().contentEquals
+                        (ConstCommon.ProcessName.MAIN_PROCESS)) {
             mSessionCenterHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -151,8 +186,10 @@ public class SessionCenter {
         boolean ret = false;
         try {
             ret = AppProfile.getContext ().bindService(intent, mSessionEngineConn, Service.BIND_AUTO_CREATE);
+            // 设置当前进程的client 连接状况
         } catch (Exception e) {
             // do nothing
+
         }
         return ret;
     }
@@ -165,13 +202,13 @@ public class SessionCenter {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i(TAG, "back engine is connected");
+            Log.i(TAG, "session engine is connected");
             onBackServiceConnected(name, service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.i(TAG, "back engine is disconnected");
+            Log.i(TAG, "session engine is disconnected");
             onBackServiceDisConnected(name);
         }
 
@@ -206,6 +243,7 @@ public class SessionCenter {
     }
 
     private void onBackServiceConnected(ComponentName name, IBinder service) {
+        Log.i(TAG,"onBackServiceConnected name = "+name);
         if (service == null) {
             mIsSessionConnect = false;
             mSessionConnection = null;
@@ -218,7 +256,6 @@ public class SessionCenter {
                 mIsSessionConnect = true;
 //                sConnectRetryCount = 0;
 
-
                 mSessionConnection.registerCallback(mSessionCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "session register error @ onServiceConnected:" + e.getMessage(), e);
@@ -226,4 +263,29 @@ public class SessionCenter {
         }
     }
 
+    private int handleSessionCallback(int ipcMsg, Bundle inBundle, Bundle outBundle) {
+        return ClientIpcCenter.getInstance ().onIpcCall (ipcMsg, inBundle, outBundle);
+    }
+
+    public int ipcCallSessionEngine(int ipcMsg, Bundle inBundle, Bundle outBundle)  {
+        int err = 0;
+        try {
+            if (mIsSessionConnect) {
+                if (inBundle == null) {
+                    inBundle = new Bundle ();
+                }
+                if (outBundle == null) {
+                    outBundle = new Bundle();
+                }
+                Log.i(TAG,"ipcCallSessionEngine ipcMsg = "+ipcMsg);
+                err = mSessionConnection.sessionCall(ipcMsg, inBundle, outBundle);
+            } else {
+            }
+        }
+        catch (RemoteException e) {
+        }
+        catch (SecurityException e) {
+        }
+        return err;
+    }
 }
