@@ -7,6 +7,7 @@ public class ConstCommon {
 
     public static class SessionConnect {
         public static final int MSG_TRY_CONNECT_SESSION_ENGINE = 0x00001;
+        public static final int MSG_TRY_START_LIVE_TEST_VIEW = 0x00002;
     }
 
     public static class ProcessName {

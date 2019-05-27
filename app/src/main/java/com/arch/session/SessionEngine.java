@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.arch.ipc.AbsIpcCenter;
 import com.arch.ipc.SessionIpcCenter;
+import com.arch.kvmc.KVMC;
 import com.arch.live.LiveService;
 import com.arch.util.AppProfile;
 import com.arch.util.ConstCommon;
@@ -24,6 +25,7 @@ public class SessionEngine extends Service {
     private final static String TAG = "SessionEngine";
     private static SessionEngine sInstance;
     private static final int HANDLE_LIVE_ASYNC_CALL = 0x200001;
+
 
     /**
      * 构造函数，由系统调用
@@ -109,11 +111,17 @@ public class SessionEngine extends Service {
         // TODO: 2019/4/19  
         //  暂定方案，后续更新方案为根据实际业务需要启动其他进程
         if (!LiveService.sIsServiceOn) {
+            Log.i(TAG,"LiveService.sIsServiceOn = " + LiveService.sIsServiceOn);
+
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    Log.i(TAG,"start live process entering..." );
+
                     Intent fsIntent = new Intent(AppProfile.getContext(),LiveService.class);
                     ServiceUtils.startServiceSafely(AppProfile.getContext(),fsIntent);
+                    Log.i(TAG,"start live process leaving..." );
+
                 }
             }, 1000);
         }
@@ -221,5 +229,9 @@ public class SessionEngine extends Service {
         Bundle inBundle = new Bundle();
         inBundle.putInt("testvalue", 2);
         SessionIpcCenter.getInstance ().ipcCall (ConstCommon.IpcMsgType.B2L_TEST,inBundle,null);
+    }
+
+    private void testWriteData() {
+        KVMC.initialize (AppProfile.getContext ());
     }
 }

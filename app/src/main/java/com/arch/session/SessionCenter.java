@@ -14,6 +14,7 @@ import android.util.Log;
 import com.arch.ipc.AbsIpcCenter;
 import com.arch.ipc.ClientIpcCenter;
 import com.arch.kvmcdemo.MainService;
+import com.arch.live.LiveTestActivity;
 import com.arch.util.AppProfile;
 import com.arch.util.ConstCommon;
 import com.arch.util.ProcessUtils;
@@ -22,6 +23,7 @@ import com.arch.util.ServiceUtils;
 import java.lang.ref.WeakReference;
 
 import static com.arch.util.ConstCommon.SessionConnect.MSG_TRY_CONNECT_SESSION_ENGINE;
+import static com.arch.util.ConstCommon.SessionConnect.MSG_TRY_START_LIVE_TEST_VIEW;
 
 public class SessionCenter {
 
@@ -63,18 +65,26 @@ public class SessionCenter {
 
     private SessionCenter() {
         mSessionCenterHandler = new SessionCenterHandler (this);
-
         if(ProcessUtils.getCurrentProcessName ().contentEquals (ConstCommon.ProcessName.LIVE_PROCESS)) {
             ClientIpcCenter.getInstance ().registerIpcReceiver (ConstCommon.IpcMsgType.B2L_TEST,
                     new AbsIpcCenter.IIpcReceiver () {
                 @Override
                 public int onIpcCall(int ipcMsg, Bundle inBundle, Bundle outBundle) {
                     Log.i (TAG,"inBundle testvalue = "+ inBundle.get ("testvalue"));
+
+                    Message msg = Message.obtain();
+                    msg.what = MSG_TRY_START_LIVE_TEST_VIEW;
+                    mSessionCenterHandler.sendMessageDelayed (msg,1000);
+
                     inBundle.putInt("testvalue2", 22);
                     ClientIpcCenter.getInstance ().ipcCall (ConstCommon.IpcMsgType.M2B_TEST,inBundle,null);
                     return 0;
                 }
             });
+
+//            Message msg = Message.obtain();
+//            msg.what = MSG_TRY_START_LIVE_TEST_VIEW;
+//            mSessionCenterHandler.sendMessageDelayed (msg,1000);
         }
     }
 
@@ -173,7 +183,15 @@ public class SessionCenter {
                     }
                     break;
 
-                }
+                    case MSG_TRY_START_LIVE_TEST_VIEW: {
+                        removeMessages (msg.what);
+
+                        LiveTestActivity.start ();
+                    }
+                    break;
+                    default:
+                        break;
+                    }
 
             }
         }
