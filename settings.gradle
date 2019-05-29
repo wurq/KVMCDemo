@@ -1,1 +1,1 @@
-include ':app', ':kvmc'
+include ':app', ':kvmc', ':byteall'
