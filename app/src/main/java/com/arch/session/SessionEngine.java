@@ -228,10 +228,14 @@ public class SessionEngine extends Service {
         Log.i (TAG,"handleLiveAsyncCall entering...");
         Bundle inBundle = new Bundle();
         inBundle.putInt("testvalue", 2);
+        testWriteData ();
         SessionIpcCenter.getInstance ().ipcCall (ConstCommon.IpcMsgType.B2L_TEST,inBundle,null);
     }
 
     private void testWriteData() {
-        KVMC.initialize (AppProfile.getContext ());
+        Log.i (TAG,"testWriteData entering...");
+        KVMC.getInstance ().initialize (AppProfile.getContext ());
+        KVMC.getInstance ().setString ("asf");
+
     }
 }

@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.arch.ipc.AbsIpcCenter;
 import com.arch.ipc.ClientIpcCenter;
+import com.arch.kvmc.KVMC;
 import com.arch.kvmcdemo.MainService;
 import com.arch.live.LiveTestActivity;
 import com.arch.util.AppProfile;
@@ -71,6 +72,10 @@ public class SessionCenter {
                 @Override
                 public int onIpcCall(int ipcMsg, Bundle inBundle, Bundle outBundle) {
                     Log.i (TAG,"inBundle testvalue = "+ inBundle.get ("testvalue"));
+                    KVMC.getInstance ().initialize (AppProfile.getContext ());
+//                    KVMC.getInstance ().getString ();
+                    Log.i (TAG,"KVMC.getInstance ().getString () "+ KVMC.getInstance ().getString());
+
 
                     Message msg = Message.obtain();
                     msg.what = MSG_TRY_START_LIVE_TEST_VIEW;

@@ -10,14 +10,17 @@
 #include <unordered_map>
 
 using namespace std;
-class FileUtil;
-class MCBuffer;
 
-class KVMC {
+
+class FileUtil;
+//class MCBuffer;
+
+ class KVMC {
 private:
 
-    KVMC * mKvmc;
-    std::unordered_map<std::string, MCBuffer> m_dic;
+
+    static KVMC * mKvmc;
+//    std::unordered_map<std::string, MCBuffer> m_dic;
     std::string m_mmapID;
     std::string m_path;
 //    std::string m_crcPath;
@@ -28,7 +31,6 @@ private:
 //    CodedOutputData *m_output;
     FileUtil *m_aFile;
 
-    void loadFromFile();
 
     void partialLoadFromFile();
 
@@ -44,7 +46,7 @@ private:
 
 public:
 
-    KVMC(const std::string &mmapID, int ashmemFD);
+    KVMC(const std::string &mmapID);
 
 
     KVMC(const std::string &mmapID,
@@ -54,22 +56,25 @@ public:
          std::string *relativePath);
 
     KVMC(const std::string &mmapID,
-         int ashmemFD,
+         int ashmemFD ,
          int ashmemMetaFd,
          std::string *cryptKey = nullptr);
 
     ~KVMC();
+
+    void loadFromFile();
 
 
     void  initFileMemory();
 
     bool  setStringWithKey(const std::string &key, const std::string &value);
 
-    bool getStringWithKey(const std::string &key, std::string &result);
+    bool getStringWithKey(const std::string &key, char * result);
 
-    static void initializeKVMC(const char *kstr);
+     void initializeKVMC(const char *kstr);
 
-    static KVMC * getInstance(const string &mmapID, int ashmemF);
+//    static KVMC * getInstance(const string &mmapID);
+
 };
 
 

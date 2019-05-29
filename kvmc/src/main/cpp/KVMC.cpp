@@ -19,12 +19,12 @@ static unordered_map<std::string, KVMC *> *g_instanceDic;
 static std::string g_rootDir;
 
 
-KVMC::KVMC(const string &mmapID, int ashmemFD)
+KVMC::KVMC(const string &mmapID)
 : m_mmapID(mmapID)
 , m_path("")
 {
     m_path = string(ASHMEM_NAME_DEF) + "/" + m_mmapID;
-    m_fd = ashmemFD;
+//    m_fd = ashmemFD;
     m_ptr = nullptr;
     m_size = 0;
     m_actualSize = 0;
@@ -42,8 +42,12 @@ void KVMC::loadFromFile() {
 //    }
 
     m_fd = open(m_path.c_str(), O_RDWR | O_CREAT, S_IRWXU);
+
+
+//string  path = "/dev/ashm/KVMC_DEMO_ID";
+//    m_fd = open(path.c_str(), O_RDWR | O_CREAT, S_IRWXU);
     if (m_fd < 0) {
-        __android_log_write(ANDROID_LOG_DEBUG, "open file  errno, path = ", m_path.c_str());
+        __android_log_write(ANDROID_LOG_DEBUG, "open file  errno, m_path = = ", m_path.c_str());
 
     } else {
         m_size = 0;
@@ -65,7 +69,7 @@ void KVMC::loadFromFile() {
         if (m_ptr == MAP_FAILED) {
 //            MMKVError("fail to mmap [%s], %s", m_mmapID.c_str(), strerror(errno));
         } else {
-            memcpy(&m_actualSize, m_ptr, Fixed32Size);
+            memcpy(&m_actualSize, m_ptr, m_size);
 //            MMKVInfo("loading [%s] with %zu size in total, file size is %zu", m_mmapID.c_str(),
 //                     m_actualSize, m_size);
 //            bool loadFromFile = false, needFullWriteback = false;
@@ -134,8 +138,6 @@ void initialize() {
 }
 
 
-//#pragma clang diagnostic push
-//#pragma ide diagnostic ignored "err_typecheck_member_reference_struct_union"
 void KVMC::initializeKVMC(const char *rootDir) {
     static pthread_once_t once_control = PTHREAD_ONCE_INIT;
     pthread_once(&once_control, initialize);
@@ -148,7 +150,6 @@ void KVMC::initializeKVMC(const char *rootDir) {
     }
 
 }
-//#pragma clang diagnostic pop
 
 
 void  KVMC::initFileMemory()
@@ -160,15 +161,25 @@ void  KVMC::initFileMemory()
 bool  KVMC::setStringWithKey(const std::string &key, const std::string &value)
 {
 
+//    void source = malloc(value.);
+
+    memcpy(m_ptr , ((uint8_t *) value.data()), value.length());
+
+    return true;
+
+//    memcpy(m_ptr, source, size);
 }
 
-bool KVMC::getStringWithKey(const std::string &key, std::string &result)
+bool KVMC::getStringWithKey(const std::string &key, char * result)
 {
+    result = (char *)malloc(4);
+    memcpy(result , m_ptr, 4);
 
+    return true;
 }
 
-KVMC *KVMC::getInstance(const string &mmapID, int ashmemF) {
-    KVMC * kvmc = new KVMC( mmapID,  ashmemF);
-
-    return nullptr;
-}
+//KVMC * KVMC::getInstance(const string &mmapID) {
+//    mKvmc = new KVMC( mmapID);
+////    return mKvmc;
+//    return nullptr;
+//}

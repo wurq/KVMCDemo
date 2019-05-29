@@ -31,7 +31,7 @@ public:
     MCBuffer(MCBuffer &&other) noexcept;
     MCBuffer &operator=(MCBuffer &&other) noexcept;
 
-    ~MMBuffer();
+    ~MCBuffer();
 
 private:
     // those are expensive, just forbid it for possibly misuse
